@@ -118,13 +118,14 @@ def validate(model, trainloader, testloader, device, path: str):
 
         for f, p, t in zip(f_name, predicted, cls_labels):
             file_.append(f)
-            pred_.append(p.cpu().numpy())
-            true_.append(t.cpu().numpy())
-            print(pred_)
+            pred_.append(p.cpu().numpy().item())
+            true_.append(t.cpu().numpy().item())
     df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
+
+    print(pred_)
     df.to_csv(os.path.join(path, "train.csv"), index=False)
 
     file_ = []
@@ -142,8 +143,8 @@ def validate(model, trainloader, testloader, device, path: str):
 
         for f, p, t in zip(f_name, predicted, cls_labels):
             file_.append(f)
-            pred_.append(p.cpu().numpy())
-            true_.append(t.cpu().numpy())
+            pred_.append(p.cpu().numpy().item())
+            true_.append(t.cpu().numpy().item())
     df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
