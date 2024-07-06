@@ -55,8 +55,8 @@ if __name__ == "__main__":
     dev = torch.device('cuda:0') if torch.cuda.is_available() else torch.cpu()
     net = net.to(dev)
 
-    os.mkdirs("/home/azureuser/runs", exists_ok=True)
-    os.mkdirs("/home/azureuser/runs/shallowLKCNN", exists_ok=True)
+    os.makedirs("/home/azureuser/runs", exists_ok=True)
+    os.makedirs("/home/azureuser/runs/shallowLKCNN", exists_ok=True)
     writer = SummaryWriter(log_dir="/home/azureuser/runs/base")
 
 
