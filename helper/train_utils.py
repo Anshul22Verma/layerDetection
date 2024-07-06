@@ -118,8 +118,9 @@ def validate(model, trainloader, testloader, device, path: str):
 
         for f, p, t in zip(f_name, predicted, cls_labels):
             file_.append(f)
-            pred_.append(p)
-            true_.append(t)
+            pred_.append(p.cpu().numpy())
+            true_.append(t.cpu().numpy())
+            print(pred_)
     df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
@@ -141,8 +142,8 @@ def validate(model, trainloader, testloader, device, path: str):
 
         for f, p, t in zip(f_name, predicted, cls_labels):
             file_.append(f)
-            pred_.append(p)
-            true_.append(t)
+            pred_.append(p.cpu().numpy())
+            true_.append(t.cpu().numpy())
     df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
