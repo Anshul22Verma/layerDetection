@@ -120,7 +120,7 @@ def validate(model, trainloader, testloader, device, path: str):
             file_.append(f)
             pred_.append(p)
             true_.append(t)
-    df = pf.DataFrame()
+    df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
@@ -143,7 +143,7 @@ def validate(model, trainloader, testloader, device, path: str):
             file_.append(f)
             pred_.append(p)
             true_.append(t)
-    df = pf.DataFrame()
+    df = pd.DataFrame()
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
