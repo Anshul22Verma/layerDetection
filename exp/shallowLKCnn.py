@@ -15,7 +15,7 @@ from torchvision.transforms import Lambda
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from helper.loader import PackTypeDataset, label_encoding
+from helper.loader import PackTypeDataset, label_encoding, transform, target_transform
 from helper.train_utils import test, train, train_epochs, validate
 
 
