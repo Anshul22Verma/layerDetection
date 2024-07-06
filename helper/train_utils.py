@@ -17,8 +17,8 @@ def test(model, testloader, criterion, device):
     model.eval()
 
     with torch.no_grad():
-        for inputs, labels in tqdm(testloader, total=len(testloader)):
-            inputs, labels, _ = inputs.to(device), labels.to(device)
+        for inputs, labels, _ in tqdm(testloader, total=len(testloader)):
+            inputs, labels = inputs.to(device), labels.to(device)
 
             # Forward pass
             outputs = model(inputs)
@@ -48,8 +48,8 @@ def train(model, trainloader, criterion, optimizer, device):
     # Switch to train mode
     model.train()
 
-    for inputs, labels in tqdm(trainloader, total=len(trainloader)):
-        inputs, labels, _ = inputs.to(device), labels.to(device)
+    for inputs, labels, _ in tqdm(trainloader, total=len(trainloader)):
+        inputs, labels = inputs.to(device), labels.to(device)
 
         # Zero the parameter gradients
         optimizer.zero_grad()
@@ -106,8 +106,8 @@ def validate(model, trainloader, testloader, device, pth: str):
     file_ = []
     true_ = []
     pred_ = []
-    for inputs, labels in tqdm(trainloader, total=len(trainloader)):
-        inputs, labels, f_name = inputs.to(device), labels.to(device)
+    for inputs, labels, f_name in tqdm(trainloader, total=len(trainloader)):
+        inputs, labels = inputs.to(device), labels.to(device)
 
         # Forward pass
         outputs = model(inputs)
@@ -129,8 +129,8 @@ def validate(model, trainloader, testloader, device, pth: str):
     file_ = []
     true_ = []
     pred_ = []
-    for inputs, labels in tqdm(trainloader, total=len(testloader)):
-        inputs, labels, f_name = inputs.to(device), labels.to(device)
+    for inputs, labels, f_name in tqdm(trainloader, total=len(testloader)):
+        inputs, labels = inputs.to(device), labels.to(device)
 
         # Forward pass
         outputs = model(inputs)
