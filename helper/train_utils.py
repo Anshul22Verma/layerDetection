@@ -124,8 +124,7 @@ def validate(model, trainloader, testloader, device, path: str):
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
-
-    print(pred_)
+    
     df.to_csv(os.path.join(path, "train.csv"), index=False)
 
     file_ = []
