@@ -99,7 +99,7 @@ def train_epochs(model, writer, trainloader, testloader, criterion, optimizer, d
     return model, writer
 
 
-def validate(model, trainloader, testloader, device, pth: str):
+def validate(model, trainloader, testloader, device, path: str):
     # Switch to train mode
     model.eval()
 
@@ -124,7 +124,7 @@ def validate(model, trainloader, testloader, device, pth: str):
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
-    df.to_csv(os.path.join(pth, "train.csv"), index=False)
+    df.to_csv(os.path.join(path, "train.csv"), index=False)
 
     file_ = []
     true_ = []
@@ -147,4 +147,4 @@ def validate(model, trainloader, testloader, device, pth: str):
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
-    df.to_csv(os.path.join(pth, "test.csv"), index=False)
+    df.to_csv(os.path.join(path, "test.csv"), index=False)
