@@ -120,8 +120,8 @@ def validate(model, trainloader, testloader, device, pth: str):
     true_ = []
     pred_ = []
     for inputs, labels in tqdm(trainloader, total=len(testloader)):
-    inputs, labels, f_name = inputs.to(device), labels.to(device)
-
+        inputs, labels, f_name = inputs.to(device), labels.to(device)
+        
         # Forward pass
         outputs = model(inputs)
 
