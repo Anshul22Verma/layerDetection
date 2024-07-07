@@ -60,13 +60,13 @@ if __name__ == "__main__":
                                train=True, label_encoding=label_encoding,
                                transform=transform, target_transform=target_transform)
     trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                            shuffle=True, num_workers=2)
+                                            shuffle=True, num_workers=0)
 
     testset = PackTypeDataset(img_dir="/home/azureuser/images/cad-dielines", df_loc="/home/azureuser/master.csv",
                               train=False, label_encoding=label_encoding,
                               transform=transform, target_transform=target_transform)
     testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                            shuffle=False, num_workers=2)
+                                            shuffle=False, num_workers=0)
 
     classes = ("Sachet/Pouch", "Carton/Box", "Label", "Blister")
     net = ShallowLKCNN(n_classes=4)
