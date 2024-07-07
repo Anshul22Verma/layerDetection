@@ -24,10 +24,10 @@ class ShallowLKCNN(nn.Module):
         super(ShallowLKCNN, self).__init__()
         
         # Define the first convolutional layer with a large kernel size
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=17, stride=3, padding=5)
+        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=13, stride=3, padding=5)
         
         # Define the second convolutional layer with a large kernel size
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=9, stride=3, padding=3)
+        self.conv2 = nn.Conv2d(in_channels=64, out_channels=32, kernel_size=9, stride=3, padding=3)
         self.conv3 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=7, stride=1, padding=3)
         self.conv4 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, stride=1, padding=3)
         # Define a fully connected layer
@@ -43,7 +43,7 @@ class ShallowLKCNN(nn.Module):
         x = F.max_pool2d(x, 2)
         x = F.relu(self.conv4(x))
         x = F.max_pool2d(x, 2)
-        # print(x.shape)
+        print(x.shape)
         x = x.view(x.size(0), -1)  # Flatten the tensor
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
