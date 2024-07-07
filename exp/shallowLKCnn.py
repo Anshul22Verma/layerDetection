@@ -43,7 +43,7 @@ class ShallowLKCNN(nn.Module):
         x = F.max_pool2d(x, 2)
         x = F.relu(self.conv4(x))
         x = F.max_pool2d(x, 2)
-        print(x.shape)
+        # print(x.shape)
         x = x.view(x.size(0), -1)  # Flatten the tensor
         x = F.relu(self.fc1(x))
         x = self.fc2(x)
