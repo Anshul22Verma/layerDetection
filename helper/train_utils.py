@@ -124,13 +124,13 @@ def validate(model, trainloader, testloader, device, path: str):
     df["File"] = file_
     df["True"] = true_
     df["Pred"] = pred_
-    
+
     df.to_csv(os.path.join(path, "train.csv"), index=False)
 
     file_ = []
     true_ = []
     pred_ = []
-    for inputs, labels, f_name in tqdm(trainloader, total=len(testloader)):
+    for inputs, labels, f_name in tqdm(testloader, total=len(testloader)):
         inputs, labels = inputs.to(device), labels.to(device)
 
         # Forward pass
@@ -144,8 +144,8 @@ def validate(model, trainloader, testloader, device, path: str):
             file_.append(f)
             pred_.append(p.cpu().numpy().item())
             true_.append(t.cpu().numpy().item())
-    df = pd.DataFrame()
-    df["File"] = file_
-    df["True"] = true_
-    df["Pred"] = pred_
-    df.to_csv(os.path.join(path, "test.csv"), index=False)
+    df_ = pd.DataFrame()
+    df_["File"] = file_
+    df_["True"] = true_
+    df_["Pred"] = pred_
+    df_.to_csv(os.path.join(path, "test.csv"), index=False)
