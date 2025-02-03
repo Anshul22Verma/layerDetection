@@ -40,7 +40,7 @@ def main():
     uq_labels = set()
     image_root = args.image_root
     df = pd.read_csv(args.image_labels)
-    for row in df:
+    for _, row in df.iterrows():
         ft_images.append(os.path.join(image_root, row["image"]))
         ft_labels.append(row["label"].split(","))
         for l in row["label"].split(","):
