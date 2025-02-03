@@ -19,8 +19,8 @@ class ClassificationDataset(Dataset):
         img = Image.open(img_path).convert('RGB')
         
         # Get the label
-        label = self.labels[idx]
-        label = [1 if l in label else 0 for l in self.uq_labels]
+        label_ = self.labels[idx]
+        label = [1 if l in label_ else 0 for l in self.uq_classes]
         
         # Apply the transformations (if any)
         if self.transform:
