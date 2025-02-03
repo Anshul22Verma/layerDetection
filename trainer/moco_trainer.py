@@ -144,7 +144,7 @@ def train_classifier_w_pretraining(
     log_dir = os.path.join(model_dir, "runs", f"ft_{pre_train_model.name}_{int(time.time())}")
     writer = SummaryWriter(log_dir)
     
-    transform = basic_classification_augmentation
+    transform = basic_classification_augmentation()
     dataset = ClassificationDataset(image_paths=image_paths, labels=labels, uq_classes=uq_classes, transform=transform)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
