@@ -29,7 +29,7 @@ def fine_tune_model(
     for epoch in range(epochs):
         model.train()
         train_loss = 0.0
-        for i, data in enumerate(train_loader):
+        for i, data in tqdm(enumerate(train_loader), desc=f"Training epoch {epoch}", total=len(train_loader)):
             x, labels = data[0].to(device), data[1].to(device)
 
             optimizer.zero_grad()
@@ -49,7 +49,7 @@ def fine_tune_model(
         model.eval()
         val_loss, correct, total = 0.0, 0, 0
         with torch.no_grad():
-            for x, labels in val_loader:
+            for x, labels in tqdm(val_loader, desc=f"Validating epoch {epoch}", total=len(val_loader)):
                 x, labels = x.to(device), labels.to(device)
                 outputs = model(x)
 

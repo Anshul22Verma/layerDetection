@@ -88,7 +88,7 @@ class BYOLLoss(nn.Module):
     def __init__(self):
         super(BYOLLoss, self).__init__()
     
-    def forward(self, z1, z2, target_z1, target_z2,):
+    def forward(self, z1, z2, target_z1, target_z2):
         # Normalize the embeddings and predictions
         z1 = F.normalize(z1, dim=-1, p=2)
         z2 = F.normalize(z2, dim=-1, p=2)

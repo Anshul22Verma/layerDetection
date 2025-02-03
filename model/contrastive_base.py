@@ -5,7 +5,7 @@ from timm import create_model  # For EfficientNet and ViT
 
 
 class ContrastiveModelWrapper(nn.Module):
-    def __init__(self, architecture="resnet50", embedding_dim=128, projection_dim=256, pretrained=True):
+    def __init__(self, architecture="resnet50", embedding_dim=128, pretrained=True):
         """
         Wrapper for contrastive learning with a learnable projection head (FCN).
         
@@ -42,12 +42,8 @@ class ContrastiveModelWrapper(nn.Module):
             raise ValueError(f"Unsupported architecture: {architecture}")
 
         # Add the projection head (FCN)
-        self.projection_head = nn.Sequential(
-            nn.Linear(in_features, projection_dim),
-            nn.BatchNorm1d(projection_dim),
-            nn.ReLU(),
-            nn.Linear(projection_dim, embedding_dim)  # Final projection
-        )
+        self.projection_head = nn.Linear(in_features, embedding_dim)
+
 
     def forward(self, x):
         features = self.encoder(x)  # Extract base features

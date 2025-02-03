@@ -8,7 +8,7 @@ import torchvision.models as models
 class MocoModelWrapper(nn.Module):
     def __init__(self, architecture="resnet50", projection_dim=128, hidden_dim=512, queue_size=65536, momentum=0.999, pretrained: bool=True):
         """
-        Universal Contrastive Learning Wrapper supporting MoCo, SimSiam, and BYOL.
+        Universal Contrastive Learning Wrapper supporting MoCo.
 
         Args:
         - architecture (str): Backbone model ('resnet50', 'densenet121', 'efficientnet_b0', 'vit_base_patch16_224')
