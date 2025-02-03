@@ -44,10 +44,10 @@ def pre_train_epochs(
 def pre_train_model(
     architecture: str, hidden_dim: int, projection_dim: int, queue_size: int, momentum: float, pretrained: bool,
     images: List, batch_size: int, num_workers: int,
-    device, model_dir: str,
+    model_dir: str,
     lr: float, temperature: float = 0.5, memory_size: int = 1024*2,
     epochs: int = 100,
-    model_path: str = 'base.pth'
+    model_name: str = 'base.pth'
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = MoCoDataset(image_paths=images)
@@ -67,7 +67,7 @@ def pre_train_model(
 
     model = pre_train_epochs(model=model, train_loader=train_loader, optimizer=optimizer, 
                              criterion=criterion, writer=writer, device=device, epochs=epochs)
-    torch.save(model, os.path.join(model_dir, model_path))
+    torch.save(model, os.path.join(model_dir, model_name))
     writer.close()
     return model
 
@@ -129,7 +129,7 @@ def fine_tune_model(
 
 def train_classifier_w_pretraining(
     pre_trained_model: MocoModelWrapper, num_classes: int, 
-    image_paths: List, labels: List,
+    image_paths: List, labels: List, uq_classes: List,
     lr: float, batch_size: int,
     epochs: int, model_dir: str
 
@@ -144,7 +144,7 @@ def train_classifier_w_pretraining(
     writer = SummaryWriter(log_dir)
     
     transform = basic_classification_augmentation
-    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, transform=transform)
+    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, uq_classes=uq_classes, transform=transform)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])

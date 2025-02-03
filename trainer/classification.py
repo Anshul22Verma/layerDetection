@@ -75,7 +75,7 @@ def fine_tune_model(
 
 def train_classifier(
     architecture: str, num_classes: int, 
-    image_paths: List, labels: List,
+    image_paths: List, labels: List, uq_classes: List,
     lr: float, batch_size: int,
     epochs: int, model_dir: str
 
@@ -88,7 +88,7 @@ def train_classifier(
     writer = SummaryWriter(log_dir)
     
     transform = basic_classification_augmentation
-    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, transform=transform)
+    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, uq_classes=uq_classes, transform=transform)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
@@ -103,5 +103,5 @@ def train_classifier(
                     writer=writer, device=device, epochs=epochs,
                     model_path=os.path.join(model_dir, f"{architecture}.pth"))
     writer.close()
-    model = torch.load(os.path.join(model_dir, f"{architecture}.pth"), weights_only=False)
+    model = torch.load(os.path.join(model_dir, f"direct_ft_{architecture}.pth"), weights_only=False)
     return model

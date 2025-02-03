@@ -44,10 +44,10 @@ def pre_train_epochs(
 def pre_train_model(
     architecture: str, hidden_dim: int, projection_dim: int, queue_size: int, momentum: float, pretrained: bool,
     images: List, batch_size: int, num_workers: int,
-    device, model_dir: str,
+    model_dir: str,
     lr: float,
     epochs: int = 100,
-    model_path: str = 'base.pth'
+    model_name: str = 'base.pth'
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = SimSiamDataset(image_paths=images)
@@ -129,10 +129,9 @@ def fine_tune_model(
 
 def train_classifier_w_pretraining(
     pre_trained_model: SimSiamModelWrapper, num_classes: int, 
-    image_paths: List, labels: List,
+    image_paths: List, labels: List, uq_classes: List,
     lr: float, batch_size: int,
     epochs: int, model_dir: str
-
 ):
     """Train model with self-supervised learning, then fine-tune for classification."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -144,7 +143,7 @@ def train_classifier_w_pretraining(
     writer = SummaryWriter(log_dir)
     
     transform = basic_classification_augmentation
-    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, transform=transform)
+    dataset = ClassificationDataset(image_paths=image_paths, labels=labels, uq_classes=uq_classes, transform=transform)
     train_size = int(0.8 * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = random_split(dataset, [train_size, val_size])
