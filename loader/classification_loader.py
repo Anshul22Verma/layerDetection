@@ -1,4 +1,5 @@
 from PIL import Image
+import torch
 from torch.utils.data import Dataset
 from typing import List
 
@@ -20,7 +21,7 @@ class ClassificationDataset(Dataset):
         
         # Get the label
         label_ = self.labels[idx]
-        label = [1 if l in label_ else 0 for l in self.uq_classes]
+        label = torch.tensor([1 if l in label_ else 0 for l in self.uq_classes], dtype=torch.float32)
         
         # Apply the transformations (if any)
         if self.transform:
