@@ -72,3 +72,33 @@ class MoCoLoss(torch.nn.Module):
 
         return loss
 
+
+class SimSiamLoss(nn.Module):
+    def __init__(self):
+        super(SimSiamLoss, self).__init__()
+
+    def forward(self, p1, z1, p2, z2):
+        # Cosine similarity loss (negative cosine similarity between projections and predictions)
+        # This assumes the input is normalized before computing similarity
+        loss = -0.5 * (F.cosine_similarity(p1, z2.detach(), dim=-1) + F.cosine_similarity(p2, z1.detach(), dim=-1))
+        return loss.mean()
+
+
+class BYOLLoss(nn.Module):
+    def __init__(self):
+        super(BYOLLoss, self).__init__()
+    
+    def forward(self, z1, z2, target_z1, target_z2,):
+        # Normalize the embeddings and predictions
+        z1 = F.normalize(z1, dim=-1, p=2)
+        z2 = F.normalize(z2, dim=-1, p=2)
+        target_z1 = F.normalize(target_z1, dim=-1, p=2)
+        target_z2 = F.normalize(target_z2, dim=-1, p=2)
+
+        # Cosine similarity between z1 and target_z2, and z2 and target_z1
+        sim_q_k_1 = torch.sum(z1 * target_z2, dim=-1)
+        sim_q_k_2 = torch.sum(z2 * target_z1, dim=-1)
+        
+        # Loss: mean of the cosine similarities
+        loss = - (sim_q_k_1 + sim_q_k_2) / 2.0
+        return loss.mean()

@@ -6,22 +6,23 @@ import torchvision.models as models
 
 
 class ByolModelWrapper(nn.Module):
-    def __init__(self, architecture="resnet50", projection_dim=128, hidden_dim=512, momentum=0.999):
+    def __init__(self, architecture="resnet50", projection_dim=128, hidden_dim=512, momentum=0.999, pretrained: bool=True):
         """
-        Universal Contrastive Learning Wrapper supporting MoCo, SimSiam, and BYOL.
+        Universal Contrastive Learning Wrapper supporting BYOL.
 
         Args:
         - architecture (str): Backbone model ('resnet50', 'densenet121', 'efficientnet_b0', 'vit_base_patch16_224')
         - projection_dim (int): Output size of the projection head
         - hidden_dim (int): Hidden layer size in projection/prediction heads
         - momentum (float): Momentum for updating key encoder BYOL
+        - pretrained (bool): Key to start from pre-trained weights        
         """
         super(ByolModelWrapper, self).__init__()
         self.momentum = momentum
 
         # Load backbone
-        self.encoder_q = self._load_backbone(architecture)
-        self.encoder_k = self._load_backbone(architecture)
+        self.encoder_q = self._load_backbone(architecture, pretrained=pretrained)
+        self.encoder_k = self._load_backbone(architecture, pretrained=pretrained)
         
         # Projection head (MLP)
         self.projector = self._get_mlp(self.encoder_q.out_features, projection_dim, hidden_dim)
@@ -34,22 +35,22 @@ class ByolModelWrapper(nn.Module):
             for param in self.encoder_k.parameters():
                 param.requires_grad = False
 
-    def _load_backbone(self, architecture):
+    def _load_backbone(self, architecture, pretrained):
         """Loads the specified backbone and removes classification layers."""
         if architecture.startswith("resnet"):
-            model = getattr(models, architecture)(pretrained=True)
+            model = getattr(models, architecture)(pretrained=pretrained)
             out_features = model.fc.in_features
             model.fc = nn.Identity()
         elif architecture.startswith("densenet"):
-            model = getattr(models, architecture)(pretrained=True)
+            model = getattr(models, architecture)(pretrained=pretrained)
             out_features = model.classifier.in_features
             model.classifier = nn.Identity()
         elif architecture.startswith("efficientnet"):
-            model = getattr(models, architecture)(pretrained=True)
+            model = getattr(models, architecture)(pretrained=pretrained)
             out_features = model.classifier[1].in_features
             model.classifier = nn.Identity()
         elif architecture.startswith("vit"):
-            model = timm.create_model(architecture, pretrained=True, num_classes=0)
+            model = timm.create_model(architecture, pretrained=pretrained, num_classes=0)
             out_features = model.embed_dim
         else:
             raise ValueError(f"Unsupported architecture: {architecture}")
@@ -75,14 +76,18 @@ class ByolModelWrapper(nn.Module):
     def forward(self, x1, x2=None):
         """Forward pass based on the contrastive method used."""
         z1 = self.projector(self.encoder_q(x1))
-        
+        z2 = self.projector(self.encoder_q(x2))
+
         with torch.no_grad():
+            # Momentum update
             self._momentum_update()
+            # Target encoder output (from the momentum encoder)
             target_z1 = self.projector(self.encoder_k(x1))
             target_z2 = self.projector(self.encoder_k(x2))
-        p1, p2 = self.predictor(z1), self.predictor(self.projector(self.encoder_q(x2)))
-        return p1, target_z2.detach(), p2, target_z1.detach()
-
+            
+        # Return embeddings for loss computation
+        return z1, z2, target_z1, target_z2
+    
     def remove_contrastive_heads(self):
         """
         Converts the contrastive learning model to a base encoder that only outputs feature projections.
@@ -92,3 +97,30 @@ class ByolModelWrapper(nn.Module):
         self.projector = None  # Remove projector
         self.predictor = None  # Remove predictor
         return self.encoder_q  # Return base encoder
+
+
+class FineTuneBYOLBaseModel(nn.Module):
+    def __init__(self, base_model, num_classes):
+        """
+        Fine-tune the contrastive model for supervised classification.
+
+        Args:
+        - base_model (ContrastiveModelWrapper): The pre-trained contrastive model.
+        - num_classes (int): Number of target classes.
+        """
+        super(FineTuneBYOLBaseModel, self).__init__()
+        self.base_model = base_model  # Keep the pre-trained encoder
+        self.encoder = self.base_model.remove_contrastive_heads()  # remove the projector and returnes the encoder only
+
+        in_features = self.encoder.out_features
+
+        # Add a classification head
+        self.classifier = nn.Sequential(
+            nn.Linear(in_features, num_classes),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        features = self.encoder(x)
+        outputs = self.classifier(features)
+        return outputs

@@ -101,7 +101,6 @@ class MocoModelWrapper(nn.Module):
         return self.encoder_q  # Return base encoder
 
 
-
 class FineTuneMoCoBaseModel(nn.Module):
     def __init__(self, base_model, num_classes):
         """

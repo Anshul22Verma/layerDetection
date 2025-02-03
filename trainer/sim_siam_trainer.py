@@ -8,10 +8,10 @@ from torch.utils.tensorboard import SummaryWriter
 import time
 from typing import List
 
-from model.moco_base import MocoModelWrapper, FineTuneMoCoBaseModel
-from loader.moco_loader import MoCoDataset
+from model.sim_siam_base import SimSiamModelWrapper, FineTuneSimSamBaseModel
+from loader.sim_siam_loader import SimSiamDataset
 from loader.classification_loader import ClassificationDataset
-from utils.loss import MoCoLoss
+from utils.loss import SimSiamLoss
 from utils.augment import basic_classification_augmentation
 
 
@@ -27,8 +27,8 @@ def pre_train_epochs(
             x1, x2 = x1.to(device), x2.to(device)
 
             optimizer.zero_grad()
-            z1, z2 = model(x1, x2)
-            loss = criterion(z1, z2)
+            p1, z1, p2, z2 = model(x1, x2)
+            loss = criterion(p1, z1, p2, z2)
 
             loss.backward()
             optimizer.step()
@@ -45,25 +45,25 @@ def pre_train_model(
     architecture: str, hidden_dim: int, projection_dim: int, queue_size: int, momentum: float, pretrained: bool,
     images: List, batch_size: int, num_workers: int,
     device, model_dir: str,
-    lr: float, temperature: float = 0.5, memory_size: int = 1024*2,
+    lr: float,
     epochs: int = 100,
     model_path: str = 'base.pth'
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    dataset = MoCoDataset(image_paths=images)
+    dataset = SimSiamDataset(image_paths=images)
     # use drop-last to drop the incomplete batch
     train_loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers, drop_last=True)
-    log_dir = os.path.join(model_dir, "runs", f"MoCo_{architecture}_{int(time.time())}")
+    log_dir = os.path.join(model_dir, "runs", f"SimSiam_{architecture}_{int(time.time())}")
     writer = SummaryWriter(log_dir)
 
-    model = MocoModelWrapper(
+    model = SimSiamModelWrapper(
         architecture=architecture, hidden_dim=hidden_dim, 
         projection_dim=projection_dim, queue_size=queue_size,
         momentum=momentum, pretrained=pretrained
     )
     model = model.to(device)
     optimizer = optim.Adam(model.parameters(), lr=lr)
-    criterion = MoCoLoss(temperature=temperature, memory_size=memory_size)
+    criterion = SimSiamLoss()
 
     model = pre_train_epochs(model=model, train_loader=train_loader, optimizer=optimizer, 
                              criterion=criterion, writer=writer, device=device, epochs=epochs)
@@ -128,7 +128,7 @@ def fine_tune_model(
 
 
 def train_classifier_w_pretraining(
-    pre_trained_model: MocoModelWrapper, num_classes: int, 
+    pre_trained_model: SimSiamModelWrapper, num_classes: int, 
     image_paths: List, labels: List,
     lr: float, batch_size: int,
     epochs: int, model_dir: str
@@ -138,7 +138,7 @@ def train_classifier_w_pretraining(
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_classes = 10  # Change this based on your dataset
     pretrained_model = pre_trained_model
-    model = FineTuneMoCoBaseModel(pretrained_model, num_classes).to(device)
+    model = FineTuneSimSamBaseModel(pretrained_model, num_classes).to(device)
 
     log_dir = os.path.join(model_dir, "runs", f"ft_{pre_train_model.name}_{int(time.time())}")
     writer = SummaryWriter(log_dir)

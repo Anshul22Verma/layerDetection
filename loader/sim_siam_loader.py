@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 from utils.augment import SimSiamAugment
 
 
-class SimSiamDataloader(Dataset):
+class SimSiamDataset(Dataset):
     def __init__(self, image_paths):
         self.image_paths = image_paths
         self.augment = SimSiamAugment()
