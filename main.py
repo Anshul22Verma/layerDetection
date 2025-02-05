@@ -45,8 +45,8 @@ def main():
         if os.path.exists(os.path.join(image_root, row["file_path"])):
             try:
                 img_path = os.path.join(image_root, row["file_path"])
-                from PIL import Image
-                img = Image.open(img_path).convert('RGB')
+                # from PIL import Image
+                # img = Image.open(img_path).convert('RGB')
                 ft_images.append(os.path.join(image_root, row["file_path"]))
 
                 labels_ = json.loads(row["labels"].replace("'", '"'))
@@ -67,7 +67,7 @@ def main():
 
     if args.ssl_method:
         # perform pre-training
-        images = [img for img in os.listdir(args.ssl_image_root) if ".png" in img]
+        images = [os.path.join(args.ssl_image_root, img) for img in os.listdir(args.ssl_image_root) if ".png" in img]
         match args.ssl_method:
             case "MoCo":
                 # MoCo pipeline
@@ -128,3 +128,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
+    # python -m main --ssl_method SimCLR --ssl_image_root /home/azureuser/data/ --ssl_epochs  100 --ssl_hidden_dim 256 --ssl_batch_size 25 --result_dir /home/azureuser/result/simclr --architecture resnet18 --image_root /home/azureuser --image_labels /home/azureuser/train_label_data.csv --epochs 10 --lr 0.0001 --batch_size 50

@@ -81,6 +81,7 @@ def train_classifier(
     epochs: int, model_dir: str
 
 ):
+    print("="*10 + " Fine-tuning the model " + "="*10)
     """Train model with self-supervised learning, then fine-tune for classification."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = PretrainedModelWrapper(architecture=architecture, num_classes=num_classes, pretrained=True)

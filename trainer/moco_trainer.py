@@ -50,6 +50,7 @@ def pre_train_model(
     epochs: int = 100,
     model_name: str = 'base.pth'
 ):
+    print("="*10 + " Pre-training the Model using MoCo Learning " + "="*10)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     dataset = MoCoDataset(image_paths=images)
     # use drop-last to drop the incomplete batch
@@ -135,6 +136,7 @@ def train_classifier_w_pretraining(
     epochs: int, model_dir: str
 
 ):
+    print("="*10 + " Fine-tuning model Pre-trained using MoCo Learning " + "="*10)
     """Train model with self-supervised learning, then fine-tune for classification."""
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_classes = 10  # Change this based on your dataset
@@ -159,5 +161,5 @@ def train_classifier_w_pretraining(
                     optimizer=optimizer, criterion=criterion,
                     writer=writer, device=device, epochs=epochs,
                     model_path=os.path.join(model_dir, f"ft_{pre_trained_model.name}.pth"))
-    model = torch.load(os.path.join(model_dir, f"ft_{pre_trained_model.name}.pth"), weights_only=False)
+    model = torch.load(os.path.join(model_dir, f"moco_ft_{pre_trained_model.name}.pth"), weights_only=False)
     return model

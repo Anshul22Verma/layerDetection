@@ -1,5 +1,6 @@
+import numpy as np
 import torch
-import troch.nn as nn
+import torch.nn as nn
 import torch.nn.functional as F
 
 
@@ -7,22 +8,46 @@ class NTXentLoss(nn.Module):
     def __init__(self, temperature=0.5):
         super().__init__()
         self.temperature = temperature
+        self._cosine_similarity = torch.nn.CosineSimilarity(dim=-1)
     
-    def forward(self, z1, z2):
-        """Compute NT-Xent loss for contrastive learning."""
-        batch_size = z1.shape[0]
-        z = torch.cat([z1, z2], dim=0)  # Concatenate positive pairs
-        z = F.normalize(z, dim=1)  # Normalize embeddings
+    def _get_correlated_mask(self, batch_size):
+        diag = np.eye(2 * batch_size)
+        l1 = np.eye((2 * batch_size), 2 * batch_size, k=-batch_size)
+        l2 = np.eye((2 * batch_size), 2 * batch_size, k=batch_size)
+        mask = torch.from_numpy((diag + l1 + l2))
+        mask = (1 - mask).type(torch.bool)
+        return mask
 
-        similarity = torch.matmul(z, z.T)  # Cosine similarity --> To find out similarity between the positive pairs
-        mask = torch.eye(2 * batch_size, dtype=torch.bool).to(z.device)
-        similarity = similarity[~mask].view(2 * batch_size, -1)
+    def forward(self, zis, zjs):
+        batch_size = zis.shape[0]
+        self.device = zis.device
+        representations = torch.cat([zjs, zis], dim=0)  # Concatenate z1 and z2
 
-        positives = torch.exp(torch.sum(z1 * z2, dim=1) / self.temperature)
-        negatives = torch.exp(similarity / self.temperature).sum(dim=1)
+        # Compute cosine similarity matrix
+        similarity_matrix = self._cosine_similarity(representations.unsqueeze(1), representations.unsqueeze(0))
 
-        loss = -torch.log(positives / negatives).mean()
-        return loss
+        mask = self._get_correlated_mask(batch_size)
+
+        # Extract positives: these are the diagonal elements (corresponding pairs)
+        l_pos = torch.diag(similarity_matrix, batch_size)
+        r_pos = torch.diag(similarity_matrix, -batch_size)
+        positives = torch.cat([l_pos, r_pos]).view(2 * batch_size, 1)
+
+        # Extract negatives: use the mask to exclude the positive pair correlations
+        negatives = similarity_matrix[mask].view(2 * batch_size, -1)
+
+        # Concatenate positives and negatives, and apply temperature scaling
+        logits = torch.cat((positives, negatives), dim=1)
+        logits /= self.temperature
+        
+        labels = torch.zeros(2 * batch_size).to(self.device).long()
+
+        # Use CrossEntropyLoss for loss calculation
+        criterion = nn.CrossEntropyLoss()
+        loss = criterion(logits, labels)
+
+        return loss / (2 * batch_size)
+
 
 class MoCoLoss(torch.nn.Module):
     def __init__(self, temperature=0.07, memory_size=4096):
