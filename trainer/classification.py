@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader, random_split
 from torch.utils.tensorboard import SummaryWriter
 import time
 from typing import List
+from tqdm import tqdm
 torch.manual_seed(2025)
 
 from loader.classification_loader import ClassificationDataset
@@ -103,5 +104,5 @@ def train_classifier(
                     writer=writer, device=device, epochs=epochs,
                     model_path=os.path.join(model_dir, f"{architecture}.pth"))
     writer.close()
-    model = torch.load(os.path.join(model_dir, f"direct_ft_{architecture}.pth"), weights_only=False)
+    model = torch.load(os.path.join(model_dir, f"{architecture}.pth"), weights_only=False)
     return model

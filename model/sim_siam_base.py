@@ -84,6 +84,11 @@ class SimSiamModelWrapper(nn.Module):
         self.predictor = None  # Remove predictor
         return self.encoder_q  # Return base encoder
 
+    @property
+    def name(self):
+        """Property to return the architecture name."""
+        return self.architecture
+
 
 class FineTuneSimSamBaseModel(nn.Module):
     def __init__(self, base_model, num_classes):

@@ -1,6 +1,7 @@
 # import os
 from PIL import Image
 from torch.utils.data import Dataset
+Image.MAX_IMAGE_PIXELS = None
 
 from utils.augment import SimCLRAugment
 

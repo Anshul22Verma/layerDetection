@@ -20,7 +20,7 @@ class MocoModelWrapper(nn.Module):
         """
         super(MocoModelWrapper, self).__init__()
         self.architecture = architecture
-        self.momentum = momentum
+        self. momentum = momentum
         self.queue_size = queue_size
 
         # Load backbone model

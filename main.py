@@ -1,4 +1,5 @@
 import argparse
+import json
 import os
 import pandas as pd
 
@@ -41,12 +42,24 @@ def main():
     image_root = args.image_root
     df = pd.read_csv(args.image_labels)
     for _, row in df.iterrows():
-        ft_images.append(os.path.join(image_root, row["image"]))
-        ft_labels.append(row["label"].split(","))
-        for l in row["label"].split(","):
-            if len(l) > 0:
-                uq_labels.add(l)
+        if os.path.exists(os.path.join(image_root, row["file_path"])):
+            try:
+                img_path = os.path.join(image_root, row["file_path"])
+                from PIL import Image
+                img = Image.open(img_path).convert('RGB')
+                ft_images.append(os.path.join(image_root, row["file_path"]))
+
+                labels_ = json.loads(row["labels"].replace("'", '"'))
+                ft_labels.append(labels_)
+                for l in labels_:
+                    if len(l) > 0:
+                        uq_labels.add(l)
+                del img
+            except Exception as e:
+                print(f"Could not load image {img_path}")
+
     num_classes = len(uq_labels)
+    
     print(f"Number of classes in the dataset are {num_classes}, {uq_labels}")
     uq_labels = list(uq_labels)
     # create the result-directory if it doesn't exist
@@ -111,3 +124,7 @@ def main():
                                 epochs=args.epochs, model_dir=args.result_dir)
 
     # -------- TESTING -------- #
+
+
+if __name__ == "__main__":
+    main()

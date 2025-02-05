@@ -50,3 +50,8 @@ class PretrainedModelWrapper(nn.Module):
     def forward(self, x):
         x = self.model(x)
         return self.activation(x)  # Apply sigmoid for multi-label output
+
+    @property
+    def name(self):
+        """Property to return the architecture name."""
+        return self.architecture
